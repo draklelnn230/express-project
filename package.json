@@ -1,0 +1,28 @@
+{
+  "name": "first-express-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon --inspect ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/draklelnn230/express-project.git"
+  },
+  "author": "lan ho",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/draklelnn230/express-project/issues"
+  },
+  "homepage": "https://github.com/draklelnn230/express-project#readme",
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "ejs": "^3.1.6",
+    "express": "^4.17.2",
+    "mongodb": "^4.3.1",
+    "sequelize": "^6.15.0"
+  }
+  
+}
