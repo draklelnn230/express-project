@@ -67,6 +67,6 @@ app.use(errorController.get404);
 
 mongoose.connect('mongodb+srv://drakeln230:JelIvr3cgKCm3SZF@cluster0.ywr61.mongodb.net/shop?retryWrites=true&w=majority')
   .then(result => {
-    app.listen(8080)
+    app.listen(3000)
   })
   .catch(err => console.log(err))
