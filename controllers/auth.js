@@ -3,10 +3,10 @@ const bcrypt = require('bcryptjs');
 
 
 const sgMail = require('@sendgrid/mail')
-
+const { validationResult } = require('express-validator/check')
 const User = require('../models/user');
 
-const API_KEY = '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'
+const API_KEY = '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'
 
 sgMail.setApiKey(API_KEY)
 
@@ -22,18 +22,49 @@ exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
-        errorMessage: message
+        errorMessage: message,
+        oldInput: { 
+            email: "", 
+            password: ""
+        },
+        validationErrors: []
     });
 };
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+
+  const errors = validationResult(req);
+
+  if ( !errors.isEmpty() ) {
+    console.log(errors)
+    return res.status(422).render('auth/login', {
+        path: '/login',
+        pageTitle: 'Login',
+        errorMessage: errors.array()[0].msg,
+        oldInput: { 
+            email: email, 
+            password: password
+        },
+        validationErrors: errors.array()
+    })
+  }
+
   User.findOne({email: email})
     .then(user => {
       if (!user) {
           req.flash('error', 'Invalid email or password.');
-          return res.redirect('/login');
+          return res.status(422).render('auth/login', {
+            path: '/login',
+            pageTitle: 'Login',
+            errorMessage: 'Invalid email or password.',
+            oldInput: { 
+                email: email, 
+                password: password
+            },
+            validationErrors: []
+        })
       }
       bcrypt.compare(password, user.password)
       .then(doMatch => {
@@ -45,8 +76,16 @@ exports.postLogin = (req, res, next) => {
                 res.redirect('/');
             });
         }
-        req.flash('error', 'Invalid email or password.');
-        res.redirect('/login');
+        return res.status(422).render('auth/login', {
+            path: '/login',
+            pageTitle: 'Login',
+            errorMessage: 'Invalid password.',
+            oldInput: { 
+                email: email, 
+                password: password
+            },
+            validationErrors: []
+        })
       })
       .catch(err =>  {
         console.log(err)
@@ -68,42 +107,50 @@ exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'Signup',
-        errorMessage: message
+        errorMessage: message,
+        oldInput: {
+            email: "",
+            password: "",
+            confirmPassword: "",
+        },
+        validationErrors: []
     })
 }
 
 exports.postSignup = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
-    const confirmPassword = req.body.confirmPassword;
-    User.findOne({email: email})
-    .then(userDoc => {
-        if (userDoc) {
-            req.flash('error', 'E-mail exists already, please pick a different email');
-            return res.redirect('/signup');
-        }
-        return bcrypt.hash(password, 12)
-        .then(hashedPassword => {
-            const user = new User({
-                email: email,
-                password: hashedPassword,
-                cart: { items: [] }
-            })
-            return user.save();
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'Signup',
+            errorMessage: errors.array()[0].msg,
+            oldInput: { email: email, password: password, confirmPassword: req.body.confirmPassword },
+            validationErrors: errors.array()
         })
-        .then(result => {
-            res.redirect('/login');
-            return sgMail.send({
-                to: email,
-                from: 'h.baolan20022@gmail.com',
-                subject: 'Signup succeeded!',
-                html: '<h1>You successfully signed up!</h1>'
-            });
+    }
+    bcrypt.hash(password, 12)
+    .then(hashedPassword => {
+        const user = new User({
+            email: email,
+            password: hashedPassword,
+            cart: { items: [] }
         })
-        .catch(err => {
-            console.log(err);
+        return user.save();
+    })
+    .then(result => {
+        res.redirect('/login');
+        return sgMail.send({
+            to: email,
+            from: 'h.baolan20022@gmail.com',
+            subject: 'Signup succeeded!',
+            html: '<h1>You successfully signed up!</h1>'
         });
-  
+    })
+    .catch(err => {
+        console.log(err);
     })
     .catch(err => console.log(err))
 }
@@ -156,11 +203,11 @@ exports.postReset = (req, res, next) => {
                     subject: 'Password reset',
                     html: `
                         <p>You requested a password reset </p>
-                        <p>Click this <a href="http://localhost:8080/reset/${token}>"link</a> to set a new password.</p>
+                        <p>Click this <a href="http://localhost:3000/reset/${token}>"link</a> to set a new password.</p>
                     `
                 })
                 .then(response => {
-                    console.log(response)
+                    console.log('Email sent successfully')
                 })
                 .catch(err => {console.log(err)})
             })
