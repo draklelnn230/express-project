@@ -40,6 +40,7 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   const errors = validationResult(req);
+
   if (!errors.isEmpty()) {
     console.log(errors.array())
     return res.status(422).render('admin/edit-product', {
@@ -49,7 +50,6 @@ exports.postAddProduct = (req, res, next) => {
       hasError: true,
       product: {
         title: title,
-        imageUrl: imageUrl,
         price: price,
         description: description
       },
