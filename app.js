@@ -13,6 +13,9 @@ const { v4: uuidv4 } = require('uuid');
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
+const shopController = require('./controllers/shop');
+const isAuth = require('./middleware/is-auth');
+
 const MONGODB_URI = 'mongodb+srv://drakeln230:JelIvr3cgKCm3SZF@cluster0.ywr61.mongodb.net/shop'
 
 const store = new MongoDBStore({
@@ -66,15 +69,10 @@ app.use(
   })
 );
 
-app.use(csrf())
+
 
 app.use(flash());
 
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn
-  res.locals.csrfToken = req.csrfToken()
-  next()
-});
 
 app.use((req, res, next) => {
   if (!req.session.user) {
@@ -93,7 +91,14 @@ app.use((req, res, next) => {
     });
 });
 
+app.post('/create-order', isAuth, shopController.postOrder);
 
+app.use(csrf())
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn
+  res.locals.csrfToken = req.csrfToken()
+  next()
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);

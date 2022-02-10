@@ -1,0 +1,41 @@
+<%- include('../includes/head.ejs') %> 
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+        <main>
+            <ul class="cart__item-list">
+                <% products.forEach(p => { %>
+                    <li class="cart__item">
+                        <h1><%= p.productId.title %></h1>
+                        <h2>Quantity: <%= p.quantity %></h2>
+                    </li>
+                    
+                <% }) %>
+                
+            </ul>
+            <div class="centered">
+                <h2>Total: <%= totalSum %></h2>
+            </div>
+            <div class="centered">
+                <form action="/create-order" method="POST">
+                    <script
+                      src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                      data-key="pk_test_51KRT7WAVZjK2gCpqUqNr4qWkGLsz1T7u4d4atqdAdiEoPsXliVZE6nD21gK2wJP6Ez18M0KOG0mAAYFOTuL8EWwh00IyN87XON"
+                      data-amount="<%= totalSum * 100 %>"
+                      data-name="Your Order"
+                      data-description="All the items you order"
+                      data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                      data-locale="auto"
+                      data-currency="usd">
+                    </script>
+                  </form>
+            </div>
+
+        </main>
+        
+        <%- include('../includes/end.ejs') %>
