@@ -19,7 +19,7 @@ const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: 'mySessions',
 });
-const csrfProtection = csrf()
+
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -66,7 +66,7 @@ app.use(
   })
 );
 
-app.use(csrfProtection)
+app.use(csrf())
 
 app.use(flash());
 
